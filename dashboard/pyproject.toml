@@ -13,6 +13,7 @@ Quart = "^0.14.1"
 quart-compress = "^0.2.1"
 requests = "^2.25.1"
 pandas = "^1.2.2"
+websocket_client = "^0.57.0"
 
 [tool.poetry.dev-dependencies]
 
