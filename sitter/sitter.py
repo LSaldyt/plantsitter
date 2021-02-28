@@ -2,7 +2,7 @@ from quart import Quart, websocket
 
 app = Quart(__name__)
 
-from time    import sleep
+from time    import sleep, time
 from sensors import initialize_sensors
 
 import asyncio
@@ -16,8 +16,9 @@ async def datasocket():
     while True:
         async with LOCK:
             plantdata = {k : v.value for k, v in SENSORS.items()}
-            sleep(0.1)
+            plantdata['timestamp'] = time()
             await websocket.send_json(plantdata)
+            sleep(0.01)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
