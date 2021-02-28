@@ -39,7 +39,6 @@ class Example:
         if self.ws is None:
             self.ws = create_connection('ws://10.42.0.74:5000/data')
         data = json.loads(self.ws.recv())
-        # data = {'light' : 0.2}
         print(data)
         print('***', self.count)
 
@@ -50,7 +49,7 @@ class Example:
             dict(Time=[i for i in range(len(self.data))], Light=self.data),
             x='Time',
             y='Light',
-            range_y=[-10, 10]
+            range_y=[0, 1]
         )
 
         self.app.push_mods({
