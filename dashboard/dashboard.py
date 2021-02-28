@@ -1,7 +1,5 @@
 from config import Config
 
-config = Config()
-
 import dash_devices
 from dash_devices.dependencies import Input, Output
 import dash_html_components as html
@@ -14,18 +12,22 @@ app = dash_devices.Dash(__name__)
 from websocket import create_connection
 import json
 
-class Example:
+TELEM = ['light', 'humidity'] # , 'rain', 'moisture']
+
+class PlantDash:
     def __init__(self, app):
+        self.config = Config()
         self.app   = app
-        self.data  = [0.5] * 100
+        self.initial = {k : [0.0] * 200 for k in TELEM}
         self.timer = None
         self.ws    = None
         self.count = 0
 
-        self.app.layout = html.Div([
-            html.Div("Light Levels"),
-            dcc.Graph(id='light_graph'),
-        ])
+        elements = []
+        for k in TELEM:
+            elements.append(html.Div(f'{k.title()} Measurement'))
+            elements.append(dcc.Graph(id=f'{k}_graph'))
+        self.app.layout = html.Div(elements)
 
         @self.app.callback_connect
         def func(client, connect):
@@ -37,34 +39,36 @@ class Example:
 
     def timer_callback(self):
         if self.ws is None:
-            self.ws = create_connection('ws://10.42.0.74:5000/data')
-        data = json.loads(self.ws.recv())
-        print(data)
-        print('***', self.count)
+            self.ws = create_connection(f'ws://{self.config.plantsitter_ip}:{self.config.plantsitter_port}/data')
+        telem = json.loads(self.ws.recv())
+        # print(telem)
+        # print('***', self.count)
 
-        self.data.append(data['light'])
-        # self.data.pop(0)
+        figures = dict()
+        for k in TELEM:
+            data = self.initial[k]
+            data.append(telem[k])
+            data.pop(0)
 
-        figure = px.line(
-            dict(Time=[i for i in range(len(self.data))], Light=self.data),
-            x='Time',
-            y='Light',
-            range_y=[0, 1]
-        )
+            figure = px.line({'Time' : [i for i in range(len(data))], k.title() : data},
+                x='Time',
+                y=k.title(),
+                range_y=[0, 1]
+            )
+            figures[f'{k}_graph'] = {'figure' : figure}
+
+        # print(figures)
 
         self.app.push_mods({
-            'light_graph': {'figure': figure},
+            **figures,
             'progress':    {'value': str(self.count)}
         })
 
         self.count += 1;
-        # if self.count > 10:
-        #     self.count = 0
-        # self.timer = Timer(.5, self.timer_callback)
         self.timer = Timer(0.01, self.timer_callback)
         self.timer.start()
 
 
 if __name__ == '__main__':
-    Example(app)
+    PlantDash(app)
     app.run_server(debug=True, host='0.0.0.0', port=5000)
