@@ -1,10 +1,23 @@
-from flask import Flask
+from quart import Quart, websocket
 
-app = Flask(__name__)
+app = Quart(__name__)
 
-@app.route('/', methods=['GET'])
-def index():
-    return {'Hello' : 'World'}
+from time    import sleep
+from sensors import initialize_sensors
+
+import asyncio
+
+SPEC    = dict(light=4, humidity=17, rain=18, moisture=27)
+SENSORS = initialize_sensors(SPEC)
+LOCK    = asyncio.Lock()
+
+@app.websocket('/data')
+async def datasocket():
+    while True:
+        async with LOCK:
+            plantdata = {k : v.value for k, v in SENSORS.items()}
+            sleep(0.1)
+            await websocket.send_json(plantdata)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(host='0.0.0.0')
