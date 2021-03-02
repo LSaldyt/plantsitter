@@ -27,8 +27,15 @@ def main():
     turret = Turret(vertical, horizontal)
 
     while True:
-        turret.turn(5, 5)
-        turret.turn(-5, -5)
+        turret.turn(-1, 10)
+        # turret.turn(-5, -5)
+    # horizontal.turn(1)
+    # horizontal.turn(1, False)
+    # horizontal.turn(5)
+    # while True:
+    #     vertical.turn(1)
+    #     vertical.turn(1, False)
+    #     vertical.turn(1)
 
 if __name__ == '__main__':
     main()

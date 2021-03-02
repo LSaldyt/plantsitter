@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.7"
 Quart = "^0.14.1"
 gpiozero = "^1.5.1"
+influxdb = "^5.3.1"
 
 [tool.poetry.dev-dependencies]
 

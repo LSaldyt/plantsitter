@@ -1,0 +1,2 @@
+{"plantsitter_ip" : "0.0.0.0", "plantsitter_port" : "5000",
+ "plantsitter_influx_addr" : "localhost", "plantsitter_influx_port" : "8086"}
