@@ -28,11 +28,3 @@ class SeriesDatabase:
 
     def get(self, field):
         return self.client.query(f'SELECT "{field}" FROM "{self.config.plantsitter_db}"."autogen"."plant_telemetry"')
-
-
-
-# time=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
-
-conn = SeriesDatabase()
-conn.insert(dict(temp=70))
-print(conn.get('temp'))
