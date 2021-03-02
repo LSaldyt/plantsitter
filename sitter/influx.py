@@ -8,6 +8,7 @@ class SeriesDatabase:
         self.config = Config()
         self.client = InfluxDBClient(host=self.config.plantsitter_influx_addr, 
                                      port=self.config.plantsitter_influx_port)
+        self.client.drop_database(self.config.plantsitter_db)
         self.client.create_database(self.config.plantsitter_db)
         self.client.switch_database(self.config.plantsitter_db)
 
@@ -24,6 +25,7 @@ class SeriesDatabase:
             data = [self.wrap(chunk) for chunk in data]
         else:
             data = [self.wrap(data)]
+        print(data)
         self.client.write_points(data)
 
     def get(self, field):

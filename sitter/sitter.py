@@ -3,8 +3,11 @@ from quart import Quart, websocket
 app = Quart(__name__)
 
 from time    import sleep, time
+from pprint  import pprint
+
 from sensors import initialize_sensors
 from influx  import SeriesDatabase
+from system  import snapshot
 
 import asyncio
 
@@ -19,7 +22,7 @@ conn = SeriesDatabase()
 #conn.insert(dict(temp=70))
 # print(conn.get('temp'))
 
-interval = 100
+interval = 5
 
 @app.websocket('/data')
 async def datasocket():
@@ -29,10 +32,12 @@ async def datasocket():
         count += 1
         async with LOCK:
             plantdata = {k : v.value for k, v in SENSORS.items()}
+            plantdata.update(snapshot())
             buff.append(plantdata)
             plantdata['timestamp'] = time()
             await websocket.send_json(plantdata)
         if count % interval == 0:
+            pprint(buff)
             conn.insert(buff)
             del buff[:]
 
