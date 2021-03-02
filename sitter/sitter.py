@@ -7,7 +7,8 @@ from sensors import initialize_sensors
 
 import asyncio
 
-SPEC    = dict(light=4, humidity=17, rain=18, moisture=27)
+# SPEC    = dict(light=4, humidity=17, rain=18, moisture=27)
+SPEC    = dict(probe=6)
 SENSORS = initialize_sensors(SPEC)
 LOCK    = asyncio.Lock()
 
