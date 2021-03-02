@@ -18,16 +18,3 @@ class Motor:
         relay.on()
         sleep(t)
         relay.off()
-
-def main():
-    vertical   = Motor(4, 17)
-    horizontal = Motor(18, 27)
-
-    while True:
-        horizontal.turn(5)
-        horizontal.turn(5, forward=False)
-        vertical.turn(5)
-        vertical.turn(5, forward=False)
-
-if __name__ == '__main__':
-    main()
