@@ -25,7 +25,6 @@ class SeriesDatabase:
             data = [self.wrap(chunk) for chunk in data]
         else:
             data = [self.wrap(data)]
-        print(data)
         self.client.write_points(data)
 
     def get(self, field):
