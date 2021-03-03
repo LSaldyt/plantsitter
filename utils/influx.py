@@ -1,7 +1,7 @@
 from influxdb import InfluxDBClient
 from datetime import datetime
 
-from config import Config
+from utils.config import Config
 
 class SeriesDatabase:
     def __init__(self):
