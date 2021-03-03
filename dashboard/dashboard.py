@@ -15,7 +15,8 @@ from time      import time
 from pprint    import pprint
 import json
 
-TELEM = ['light', 'humidity' , 'rain', 'moisture']
+# TELEM = ['light', 'humidity' , 'rain', 'moisture']
+TELEM = ['probe']
 LATENCY_THRESHOLD = 0.05
 
 class PlantDash:
