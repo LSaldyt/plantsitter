@@ -1,4 +1,5 @@
-from config import Config
+import patch
+from utils.config import Config
 
 import dash_devices
 from dash_devices.dependencies import Input, Output
@@ -16,7 +17,7 @@ from pprint    import pprint
 import json
 
 # TELEM = ['light', 'humidity' , 'rain', 'moisture']
-TELEM = ['probe']
+TELEM = ['light']
 LATENCY_THRESHOLD = 0.05
 
 class PlantDash:

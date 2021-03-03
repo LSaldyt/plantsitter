@@ -6,7 +6,7 @@ from config import Config
 class SeriesDatabase:
     def __init__(self):
         self.config = Config()
-        self.client = InfluxDBClient(host=self.config.plantsitter_influx_addr, 
+        self.client = InfluxDBClient(host=self.config.plantsitter_influx_addr,
                                      port=self.config.plantsitter_influx_port)
         self.client.drop_database(self.config.plantsitter_db)
         self.client.create_database(self.config.plantsitter_db)

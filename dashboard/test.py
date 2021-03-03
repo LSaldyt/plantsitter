@@ -1,8 +1,10 @@
+
+import patch
+from utils.config import Config
 from websocket import create_connection
-from pprint import pprint
-from config import Config
 
 from time import time
+from pprint import pprint
 
 if __name__ == '__main__':
     config = Config()
