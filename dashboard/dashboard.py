@@ -14,6 +14,7 @@ from websocket import create_connection
 from datetime  import datetime
 from time      import time
 from pprint    import pprint
+import logging as log
 import json
 
 # TELEM = ['light', 'humidity' , 'rain', 'moisture']
@@ -47,12 +48,23 @@ class PlantDash:
             print(client, connect, len(app.clients))
             if connect and len(app.clients) == 1:
                 self.start = datetime.now()
-                self.timer_callback()
+                self.communication_loop()
             elif not connect and len(app.clients) == 0:
                 self.timer.cancel()
 
-    def initialize(self):
-        self.ws = create_connection(f'ws://{self.config.plantsitter_ip}:{self.config.plantsitter_port}/data')
+    def ensure_connection(self):
+        try:
+            if self.ws is None:
+                self.ws = create_connection(f'ws://{self.config.plantsitter_ip}:{self.config.plantsitter_port}/data')
+                print(f'Connection successfully established!', flush=True)
+            else:
+                pass
+                # print(self.ws, flush=True)
+            return True
+        except Exception as e:
+            self.ws = None
+            print(f'Unable to establish websocket connection ({e}), retrying..', flush=True)
+            return False
 
     def plot(self):
         figures = dict()
@@ -75,30 +87,35 @@ class PlantDash:
             self.initial[k] = data
         self.count += 1
 
-    def timer_callback(self):
-        if self.ws is None:
-            self.initialize()
-        telem = json.loads(self.ws.recv())
-        self.update(telem)
-        now     = datetime.now()
-        latency = (now - datetime.fromtimestamp(telem['timestamp'])).total_seconds()
-        duration = (now - self.start).total_seconds()
-        rrate   = self.count / duration
-        prate   = self.pcount / duration
-
-        while latency > LATENCY_THRESHOLD:
+    def communication_loop(self):
+        if self.ensure_connection():
             telem = json.loads(self.ws.recv())
+            pprint(telem)
             self.update(telem)
+            now     = datetime.now()
             latency = (now - datetime.fromtimestamp(telem['timestamp'])).total_seconds()
-        figures = self.plot()
-        self.app.push_mods({
-            'latency' : {'children' : f'Latency: {latency:.4f}s'},
-            'rrate'   : {'children' : f'Receive Rate: {rrate:.2f}hz'},
-            'prate'   : {'children' : f'Plot Rate: {prate:.2f}hz'},
-            **figures,
-        })
+            duration = (now - self.start).total_seconds()
+            rrate   = self.count / duration
+            prate   = self.pcount / duration
 
-        self.timer = Timer(0.01, self.timer_callback)
+            while latency > LATENCY_THRESHOLD:
+                telem = json.loads(self.ws.recv())
+                self.update(telem)
+                latency = (now - datetime.fromtimestamp(telem['timestamp'])).total_seconds()
+            figures = self.plot()
+            self.app.push_mods({
+                'latency' : {'children' : f'Latency: {latency:.4f}s'},
+                'rrate'   : {'children' : f'Receive Rate: {rrate:.2f}hz'},
+                'prate'   : {'children' : f'Plot Rate: {prate:.2f}hz'},
+                **figures,
+            })
+            self.timer = Timer(0.01, self.communication_loop)
+        else:
+            self.app.push_mods({
+                'latency' : {'children' : f'No Connection'},
+                'rrate'   : {'children' : f'No Connection'},
+                'prate'   : {'children' : f'No Connection'}})
+            self.timer = Timer(1.00, self.communication_loop)
         self.timer.start()
 
 
