@@ -49,10 +49,10 @@ async def serializer():
         plantdata = await capture(count)
         buff.append(plantdata)
         if count % database_interval == 0:
-            await asyncio.sleep(1)
             conn.insert(buff)
             del buff[:]
             print(f'Inserted Database Entry {count // database_interval}', flush=True)
+            await asyncio.sleep(1)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

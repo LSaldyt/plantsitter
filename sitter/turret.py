@@ -1,5 +1,6 @@
 from multiprocessing import Process
 from motor import Motor
+from time import sleep
 
 def _turn(motor, t, direction):
     motor.turn(abs(t), direction)
@@ -22,20 +23,19 @@ class Turret:
                 process.join()
 
 def main():
-    vertical   = Motor(4, 17)
-    horizontal = Motor(18, 27)
+    horizontal = Motor(4, 17)
+    vertical   = Motor(18, 27)
     turret = Turret(vertical, horizontal)
 
-    while True:
-        turret.turn(-1, 10)
-        # turret.turn(-5, -5)
-    # horizontal.turn(1)
-    # horizontal.turn(1, False)
-    # horizontal.turn(5)
     # while True:
-    #     vertical.turn(1)
-    #     vertical.turn(1, False)
-    #     vertical.turn(1)
+    #     # horizontal.turn(1)
+    #     # horizontal.turn(1, False)
+    #     vertical.turn(.25)
+    #     sleep(1)
+    #     vertical.turn(.25, False)
+    #     sleep(1)
+    # turret.turn(-1, 10)
+    # turret.turn(-5, -5)
 
 if __name__ == '__main__':
     main()

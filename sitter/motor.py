@@ -18,3 +18,17 @@ class Motor:
         relay.on()
         sleep(t)
         relay.off()
+
+def main():
+    pumps  = [Relay(p) for p in [22, 23]]
+    motors = [(m, Relay(m)) for m in [18, 27, 4, 17]]
+    while True:
+        for m, relay in motors:
+            print(f'Motor {m} is on..', flush=True, end='')
+            relay.on()
+            sleep(1)
+            relay.off()
+            print('.. and now off.', flush=True)
+
+if __name__ == '__main__':
+    main()
