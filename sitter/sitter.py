@@ -51,12 +51,12 @@ async def datasocket():
 async def commandsocket():
     while True:
         data = await websocket.receive_json()
-        if 'pump' in data:
-            main.turn(data['pump'])
+        if 'main' in data:
+            main.turn(abs(data['main']), data['main'] > 0)
         elif 'horizontal' in data:
-            horizontal.turn(data['horizontal'])
+            horizontal.turn(abs(data['horizontal']), data['horizontal'] > 0)
         elif 'vertical' in data:
-            vertical.turn(data['vertical'])
+            vertical.turn(abs(data['vertical']), data['vertical'] > 0)
         print(data, flush=True)
 
 async def serializer():
