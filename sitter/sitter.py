@@ -12,6 +12,8 @@ from utils.influx  import SeriesDatabase
 
 import asyncio
 
+from motor import Motor
+
 app = Quart(__name__)
 
 PROBES = [6, 13, 19, 26, 16, 21, 12, 5]
@@ -24,6 +26,10 @@ conn = SeriesDatabase()
 
 database_interval = 100
 system_interval   = 10
+
+main = Motor(22, 23)
+horizontal = Motor(18, 27)
+vertical   = Motor(4, 17)
 
 async def capture(i):
     async with LOCK:
@@ -40,6 +46,18 @@ async def datasocket():
     while True:
         count += 1
         await websocket.send_json(await capture(count))
+
+@app.websocket('/command')
+async def commandsocket():
+    while True:
+        data = await websocket.receive_json()
+        if 'pump' in data:
+            main.turn(data['pump'])
+        elif 'horizontal' in data:
+            horizontal.turn(data['horizontal'])
+        elif 'vertical' in data:
+            vertical.turn(data['vertical'])
+        print(data, flush=True)
 
 async def serializer():
     count = 0
