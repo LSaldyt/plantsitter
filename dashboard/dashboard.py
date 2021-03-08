@@ -17,8 +17,7 @@ from pprint    import pprint
 import logging as log
 import json
 
-# TELEM = ['light', 'humidity' , 'rain', 'moisture']
-TELEM = ['light']
+TELEM = ['light', 'humidity' ]
 LATENCY_THRESHOLD = 0.05
 
 class PlantDash:
@@ -93,6 +92,17 @@ class PlantDash:
                                         value=['Agave', 'Rosemary'],
                                         className="dcc_control",
                                     ),
+                                    dcc.Dropdown(
+                                        id='actuator',
+                                        options=[dict(label='Pump', value='main'),
+                                                 dict(label='L/R',  value='horizontal'),
+                                                 dict(label='U/D',  value='vertical'),
+                                                 ],
+                                        value='main',
+                                        className="dcc_control",
+                                    ),
+                                    html.Div(dcc.Input(id='input-on-submit', type='number', value=1.0)),
+                                    html.Button('Submit', id='command', n_clicks=0)
                                 ],
                                 className="pretty_container four columns",
                                 id="cross-filter-options",
@@ -116,6 +126,16 @@ class PlantDash:
                                                 id='prate',
                                                 className="mini_container",
                                             ),
+                                            html.Div(
+                                                ['Humidity', html.H6(id='humidity_text')],
+                                                id='humidity',
+                                                className="mini_container",
+                                            ),
+                                            html.Div(
+                                                ['Light', html.H6(id='light_text')],
+                                                id='light',
+                                                className="mini_container",
+                                            ),
                                         ],
                                         id="info-container",
                                         className="row container-display",
@@ -133,8 +153,6 @@ class PlantDash:
                         className="row flex-display",
                     ),
                     html.Br(),
-                    html.Div(dcc.Input(id='input-on-submit', type='text')),
-                    html.Button('Submit', id='command', n_clicks=0)
                     ]
         for k in TELEM:
             elements.append(html.Div(f'{k.title()} Measurement'))
@@ -142,9 +160,11 @@ class PlantDash:
         self.app.layout = html.Div(elements)
 
         @app.callback(None, [dash_devices.dependencies.Input('command', 'n_clicks')],
-                            [dash_devices.dependencies.State('input-on-submit', 'value')])
-        def command(n_clicks, value):
-            self.command.send(json.dumps({'pump' : 4.0}))
+                            [dash_devices.dependencies.State('input-on-submit', 'value'),
+                             dash_devices.dependencies.State('actuator', 'value')
+                                ])
+        def command(n_clicks, value, actuator):
+            self.command.send(json.dumps({actuator : value}))
             print(f'The input value was "{value}" and the button has been clicked {n_clicks} times')
 
         @self.app.callback_connect
@@ -203,23 +223,27 @@ class PlantDash:
             rrate   = self.count / duration
             prate   = self.pcount / duration
 
+            light    = telem['light']
+            humidity = telem['humidity']
+
             while latency > LATENCY_THRESHOLD:
                 telem = json.loads(self.ws.recv())
                 self.update(telem)
                 latency = (now - datetime.fromtimestamp(telem['timestamp'])).total_seconds()
+            latency = max(0, latency)
             figures = self.plot()
             self.app.push_mods({
-                'latency' : {'children': [html.H6('Latency:'),      f'{latency:.4f}s']},
-                'rrate'   : {'children': [html.H6('Receive Rate:'), f'{rrate:.2f}hz']},
-                'prate'   : {'children': [html.H6('Plot Rate:'),    f'{prate:.2f}hz']},
+                'latency'  : {'children': [html.H6('Latency:'),      f'{latency:.4f}s']},
+                'rrate'    : {'children': [html.H6('Receive Rate:'), f'{rrate:.2f}hz']},
+                'prate'    : {'children': [html.H6('Plot Rate:'),    f'{prate:.2f}hz']},
+                'light'    : {'children': [html.H6('Light:'),        f'{light:.2f}']},
+                'humidity' : {'children': [html.H6('Humidity:'),     f'{humidity:.2f}hz']},
                 **figures,
             })
             self.timer = Timer(0.01, self.communication_loop)
         else:
-            self.app.push_mods({
-                'latency' : {'children': [html.H6('No Connection')]},
-                'rrate'   : {'children': [html.H6('No Connection')]},
-                'prate'   : {'children': [html.H6('No Connection')]}})
+            no_conn = {k : {'children' : [html.H6('No Connection')]} for k in ['latency', 'rrate', 'prate', 'light', 'humidity']}
+            self.app.push_mods(no_conn)
             self.timer = Timer(1.00, self.communication_loop)
         self.timer.start()
 
