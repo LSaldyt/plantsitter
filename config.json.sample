@@ -2,4 +2,7 @@
  "plantsitter_influx_addr" : "localhost", "plantsitter_influx_port" : "8086",
  "plantsitter_db" : "plants",
  "twilio_sid" : "example",
- "twilio_token" : "example"}
+ "twilio_token" : "example",
+ "from_number" : "+12345678901",
+ "to_number" : "+12345678901"
+ }
