@@ -15,6 +15,11 @@ requests = "^2.25.1"
 pandas = "^1.2.2"
 websocket_client = "^0.57.0"
 twilio = "^6.54.0"
+oauth2 = "^1.9.0"
+googleAPI = "^0.1.0"
+google-api-python-client = "^2.0.2"
+google-auth-httplib2 = "^0.1.0"
+google-auth-oauthlib = "^0.4.3"
 
 [tool.poetry.dev-dependencies]
 

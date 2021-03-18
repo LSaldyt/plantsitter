@@ -4,5 +4,8 @@
  "twilio_sid" : "example",
  "twilio_token" : "example",
  "from_number" : "+12345678901",
- "to_number" : "+12345678901"
+ "to_number" : "+12345678901",
+ "google_client_id" : "example",
+ "google_client_secret" : "example",
+ "email" : "example@gmail.com"
  }
