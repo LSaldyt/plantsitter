@@ -111,15 +111,15 @@ class PlantDash:
             figures = self.plot()
             self.app.push_mods({
                 'latency'  : {'children': [html.H6('Latency:'),      f'{latency:.4f}s']},
-                'rrate'    : {'children': [html.H6('Receive Rate:'), f'{rrate:.2f}hz']},
-                'prate'    : {'children': [html.H6('Plot Rate:'),    f'{prate:.2f}hz']},
+                'receive_rate'    : {'children': [html.H6('Receive Rate:'), f'{rrate:.2f}hz']},
+                'plot_rate'    : {'children': [html.H6('Plot Rate:'),    f'{prate:.2f}hz']},
                 'light'    : {'children': [html.H6('Light:'),        f'{light:.2f}']},
                 'humidity' : {'children': [html.H6('Humidity:'),     f'{humidity:.2f}hz']},
                 **figures,
             })
             self.timer = Timer(0.01, self.communication_loop)
         else:
-            no_conn = {k : {'children' : [html.H6('No Connection')]} for k in ['latency', 'rrate', 'prate', 'light', 'humidity']}
+            no_conn = {k : {'children' : [html.H6('No Connection')]} for k in ['latency', 'receive_rate', 'plot_rate', 'light', 'humidity']}
             self.app.push_mods(no_conn)
             self.timer = Timer(1.00, self.communication_loop)
         self.timer.start()
