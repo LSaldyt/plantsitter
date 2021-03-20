@@ -2,7 +2,7 @@ import patch
 from utils.config import Config
 
 import dash_devices
-from dash_devices.dependencies import Input, Output
+from dash_devices.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
 import plotly.express as px
@@ -33,20 +33,42 @@ class PlantDash:
         self.pcount = 0
         self.start = datetime.now()
 
+        self.plants = []
+
         self.app.layout = create_elements(app, TELEM)
 
-        @app.callback(None, [dash_devices.dependencies.Input('command', 'n_clicks')],
-                            [dash_devices.dependencies.State('input-on-submit', 'value'),
-                             dash_devices.dependencies.State('actuator', 'value')
+        @app.callback(None, [Input('command', 'n_clicks')],
+                            [State('input-on-submit', 'value'),
+                             State('actuator', 'value')
                                 ])
         def command(n_clicks, value, actuator):
             self.command.send(json.dumps({actuator : value}))
             print(f'The input value was "{value}" and the button has been clicked {n_clicks} times')
 
+
+        @app.callback(
+                [Output('plant_map', 'figure'),
+                 Output('plant_select', 'value'),
+                 Output('plant_select', 'options')],
+                [Input('add_plant', 'n_clicks')],
+                [State('add_plant', 'value'),
+                 State('plant_name', 'value'),
+                 State('x_coordinate', 'value'),
+                 State('y_coordinate', 'value'),
+                 State('plant_select', 'value'),
+                 State('plant_select', 'options')])
+        def add_plant(n_clicks, button_value, plant_name, x, y, plant_vals, plant_options):
+            print(f'Adding plant!!: {plant_name} ({x}, {y})')
+            self.plants.append((plant_name, x, y))
+            plant_vals.append(plant_name)
+            plant_options.append({'label' : plant_name, 'value' : plant_name})
+            fig = px.scatter(x=[p[1] for p in self.plants], y=[p[2] for p in self.plants], text=[p[0] for p in self.plants])
+            fig.update_layout(title_text='Plant Locations')
+            return fig, plant_vals, plant_options
+
         @self.app.callback_connect
         def func(client, connect):
             print(client, connect, len(app.clients))
-            self.app.push_mods({'plant_map' : {'figure' : px.scatter(x=[0, 1, 2, 3, 4], y=[0, 1, 4, 9, 16])}})
             if connect and len(app.clients) == 1:
                 self.start = datetime.now()
                 self.communication_loop()
