@@ -139,7 +139,7 @@ class PlantDash:
                 'humidity' : {'children': [html.H6('Humidity:'),     f'{humidity:.2f}hz']},
                 **figures,
             })
-            self.timer = Timer(0.01, self.communication_loop)
+            self.timer = Timer(0.05, self.communication_loop)
         else:
             no_conn = {k : {'children' : [html.H6('No Connection')]} for k in ['latency', 'receive_rate', 'plot_rate', 'light', 'humidity']}
             self.app.push_mods(no_conn)
