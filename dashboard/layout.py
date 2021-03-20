@@ -14,7 +14,7 @@ def mini(name):
 def create_elements(app, TELEM):
     elements = [Div([
         Div([Img(src=app.get_asset_url('asu_logo_alt.png'),
-                 id="plotly-image",
+                 id='asu_logo',
                  style={
                      "height": "100px",
                      "width": "auto",
@@ -26,9 +26,13 @@ def create_elements(app, TELEM):
                   H6('By Lucas Saldyt', style={"margin-top": "0px"}),])],
             className="one-half column",
             id="title",),
-        Div([],
-            className="one-third column",
-            id='navigation',), ],
+        Div([Img(src=app.get_asset_url('pfaf_logo_bg.png'),
+                 id='pfaf_logo',
+                 style={
+                     "height": "100px",
+                     "width": "auto",
+                     "margin-bottom": "25px",
+                 },)], className="one-third column",), ],
     id="header",
     className="row flex-display",
     style={"margin-bottom": "25px"},),

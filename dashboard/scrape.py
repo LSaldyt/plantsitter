@@ -14,6 +14,13 @@ with webdriver.Chrome(options=op) as driver:
     wait = WebDriverWait(driver, 10)
     driver.get('https://pfaf.org/user/Default.aspx')
     driver.find_element(By.NAME, 'ctl00$ContentPlaceHolder1$txtSearch').send_keys('Radish' + Keys.RETURN)
-    first_result = wait.until(presence_of_element_located((By.ID, 'ContentPlaceHolder1_gvresults')))
+    table = wait.until(presence_of_element_located((By.ID, 'ContentPlaceHolder1_gvresults')))
+    rows = table.find_elements(By.TAG_NAME, 'tr')
+    for row in rows:
+        col = row.find_elements(By.TAG_NAME, 'td')
+        for cell in col:
+            print(cell.text, end=' ')
+        print('')
+    1/0
     print(first_result)
     print(first_result.get_attribute('innerHTML'))
