@@ -7,5 +7,8 @@
  "to_number" : "+12345678901",
  "google_client_id" : "example",
  "google_client_secret" : "example",
- "email" : "example@gmail.com"
+ "email" : "example@gmail.com",
+ "connections" : ["data", "command"],
+ "sleep_normal" : 0.05,
+ "sleep_no_connection" : 1.0
  }
