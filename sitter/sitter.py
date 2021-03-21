@@ -70,7 +70,7 @@ async def serializer():
             conn.insert(buff)
             del buff[:]
             print(f'Inserted Database Entry {count // database_interval}', flush=True)
-            await asyncio.sleep(1)
+            await asyncio.sleep(10.0)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
