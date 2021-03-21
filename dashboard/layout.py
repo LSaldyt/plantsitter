@@ -11,28 +11,27 @@ def mini(name):
     idn = to_id(name)
     return Div([name.title(), H6(id=f'{idn}_text')], id=f'{idn}', className="mini_container")
 
-def create_elements(app, TELEM):
-    elements = [Div([
-        Div([Img(src=app.get_asset_url('asu_logo_alt.png'),
-                 id='asu_logo',
+def image(app, filename):
+    return Img(src=app.get_asset_url(filename),
+                 id=filename.split('.')[0],
                  style={
                      "height": "100px",
                      "width": "auto",
-                     "margin-bottom": "25px",
-                 },)], className="one-third column",),
+                     "margin-bottom": "25px"},)
+
+# TODO: Add plantnet logo
+
+def create_elements(app, TELEM):
+    elements = [Div([
+        Div([image(app, 'asu_logo_alt.png')], className="one-third column",),
         Div([Div([H3('PlantSitter',
                      style={"margin-bottom": "0px"},),
                   H5('Raspberry-Pi Based Live Agriculture Monitoring', style={"margin-top": "0px"}),
                   H6('By Lucas Saldyt', style={"margin-top": "0px"}),])],
             className="one-half column",
             id="title",),
-        Div([Img(src=app.get_asset_url('pfaf_logo_bg.png'),
-                 id='pfaf_logo',
-                 style={
-                     "height": "100px",
-                     "width": "auto",
-                     "margin-bottom": "25px",
-                 },)], className="one-third column",), ],
+        Div([image(app, 'pfaf_logo_bg.png')], className="one-third column",),
+        ],
     id="header",
     className="row flex-display",
     style={"margin-bottom": "25px"},),
