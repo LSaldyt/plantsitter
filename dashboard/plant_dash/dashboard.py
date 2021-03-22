@@ -7,19 +7,17 @@ import dash_core_components as dcc
 import plotly.express as px
 from threading import Timer
 
-app = dash_devices.Dash(__name__)
-
 from websocket import create_connection
 from datetime  import datetime
 import logging as log
 
 from utils.config import Config
 
-from layout import create_elements
+from .layout import create_elements
 
-from controller import Controller
-from monitor    import Monitor, TELEM
-from tracker    import Tracker
+from .controller import Controller
+from .monitor    import Monitor, TELEM
+from .tracker    import Tracker
 
 class PlantDash:
     def __init__(self, app):
@@ -75,7 +73,3 @@ class PlantDash:
             self.no_connection()
             self.timer = Timer(self.config.sleep_no_connection, self.loop)
         self.timer.start()
-
-if __name__ == '__main__':
-    PlantDash(app)
-    app.run_server(debug=True, host='0.0.0.0', port=5000)

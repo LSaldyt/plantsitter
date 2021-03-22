@@ -9,8 +9,8 @@ from pprint import pprint
 
 import json, os
 
-fields = ['latin_name', 'common_name', 'habitat', 'height', 'hardiness', 'growth', 'soil', 'shade', 'moisture', 'edible', 'medicinal', 'other']
-key = dict(growth=dict(S='slow', M='medium', F='fast'),
+FIELDS = ['latin_name', 'common_name', 'habitat', 'height', 'hardiness', 'growth', 'soil', 'shade', 'moisture', 'edible', 'medicinal', 'other']
+KEY = dict(growth=dict(S='slow', M='medium', F='fast'),
            soil=dict(L='light', M='medium', H='heavy'),
            pH=dict(A='acidic', N='neutral', B='basic'),
            shade=dict(F='full', S='semi', N='none'),
@@ -33,20 +33,49 @@ class PlantScraper:
         for row in rows:
             plant = dict()
             col = row.find_elements(By.TAG_NAME, 'td')
-            for k, cell in zip(fields, col):
+            for k, cell in zip(FIELDS, col):
                 plant[k] = cell.text
-            plants.append(plant)
+            if len(plant) > 0:
+                plants.append(plant)
         return plants
 
     def expand(self, plant):
-        pass
+        for k, v in plant.items():
+            if k in KEY:
+                vnew = []
+                for term, replacement in KEY[k].items():
+                    if term in v:
+                        vnew.append(replacement)
+                v = vnew
+            elif ',' in v:
+                v = list(v.split(','))
+            elif k == 'hardiness' and '-' in v:
+                if v == '-':
+                    v = []
+                else:
+                    a, b = map(int, v.split('-'))
+                    v = list(range(a, b + 1))
+            else:
+                try:
+                    v = int(v)
+                except ValueError:
+                    try:
+                        v = float(v)
+                    except ValueError:
+                        pass
+            plant[k] = v # Easier
+        if not isinstance(plant['common_name'], list):
+            plant['common_name'] = [plant['common_name']]
+        return plant
 
+scraper = PlantScraper()
 if os.path.isfile('plant.json'):
     with open('plant.json', 'r') as infile:
         plants = json.load(infile)
         pprint(plants)
+        for plant in plants:
+            pprint(scraper.expand(plant))
 else:
-    scraper = PlantScraper()
     plants = scraper.search('Radish')
     with open('plant.json', 'w') as outfile:
         json.dump(plants, outfile)

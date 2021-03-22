@@ -11,7 +11,7 @@ import json
 
 from utils.config import Config
 
-from connection import Connection
+from .connection import Connection
 
 class Controller(Connection):
     def __init__(self, app, connections):
