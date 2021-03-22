@@ -18,7 +18,7 @@ from datetime import datetime
 from utils.config import Config
 
 class MongoDatabases:
-    def __init__(self, databases):
+    def __init__(self):
         self.config = Config()
         self.client = MongoClient() # self.config.mongo_addr, self.config.mongo_port
 

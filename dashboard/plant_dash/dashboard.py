@@ -12,6 +12,7 @@ from datetime  import datetime
 import logging as log
 
 from utils.config import Config
+from utils.mongo  import MongoDatabases
 
 from .layout import create_elements
 
@@ -19,18 +20,23 @@ from .controller import Controller
 from .monitor    import Monitor, TELEM
 from .tracker    import Tracker
 
+from plant_care.plant_scraper import PlantScraper
+
 class PlantDash:
     def __init__(self, app):
+        self.mongo      = MongoDatabases()
         self.config     = Config()
         self.app        = app
         self.connections = {k : None for k in self.config.connections}
+
+        self.scraper = PlantScraper(self.mongo)
 
         self.controller = Controller(app, self.connections)
         self.monitor    = Monitor(app, self.connections)
 
         self.handlers = [self.controller, self.monitor]
 
-        self.tracker    = Tracker(app)
+        self.tracker    = Tracker(app, self.mongo)
 
         self.app.layout = create_elements(app, TELEM)
 
