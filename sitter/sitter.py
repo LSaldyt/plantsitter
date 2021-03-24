@@ -28,8 +28,8 @@ database_interval = 100
 system_interval   = 10
 
 main = Motor(22, 23)
-horizontal = Motor(18, 27)
-vertical   = Motor(4, 17)
+vertical   = Motor(18, 27)
+horizontal = Motor(4, 17)
 
 async def capture(i):
     async with LOCK:
