@@ -13,6 +13,7 @@ from utils.influx  import SeriesDatabase
 import asyncio
 
 from motor import Motor
+from turret import Turret
 
 app = Quart(__name__)
 
@@ -26,10 +27,6 @@ conn = SeriesDatabase()
 
 database_interval = 100
 system_interval   = 10
-
-main = Motor(22, 23)
-vertical   = Motor(18, 27)
-horizontal = Motor(4, 17)
 
 async def capture(i):
     async with LOCK:
@@ -52,12 +49,11 @@ async def commandsocket():
     while True:
         data = await websocket.receive_json()
         if 'main' in data:
-            main.turn(abs(data['main']), data['main'] > 0)
+            turret.pump.turn(abs(data['main']))
         elif 'horizontal' in data:
-            horizontal.turn(abs(data['horizontal']), data['horizontal'] > 0)
+            turret.turn(data['horizontal'])
         elif 'vertical' in data:
-            vertical.turn(abs(data['vertical']), data['vertical'] > 0)
-        print(data, flush=True)
+            turret.up(data['vertical'])
 
 async def serializer():
     count = 0

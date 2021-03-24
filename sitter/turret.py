@@ -104,10 +104,11 @@ def main():
     turret = Turret()
     # turret.water_at(250, 250)
     # turret.water_at(350, 0, safe=True)
-    # turret.turn(5)
-    turret.up(90)
-    turret.turn(-90)
-    turret.up(-90)
+    turret.turn(5)
+    turret.turn(-5)
+    # turret.up(90)
+    #turret.turn(-90)
+    # turret.up(-90)
 
 if __name__ == '__main__':
     main()
