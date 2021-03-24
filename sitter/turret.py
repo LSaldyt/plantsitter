@@ -67,23 +67,47 @@ class Turret:
         self.horizontal.turn(abs(angle * horizontal_calibration), angle < 0)
         self.theta_h += angle
 
+    def reset(self):
+        theta_v = 90.0 - self.theta_v
+        self.up(theta_v)
+
     def inverse(self, x, y):
         theta_h = self.inv_theta_h(x, y)
         theta_v = self.inv_theta_v(x, y)
-        print(theta_h, theta_v)
         theta_h = theta_h - self.theta_h
         theta_v = theta_v - self.theta_v
-        print(theta_h, theta_v)
         self.turn(theta_h)
         self.up(theta_v)
 
+    def safe_inverse(self, x, y):
+        self.reset()
+        self.inverse(x, y)
+        self.reset()
+        self.inverse(0.0, arm_length)
+
+    def water(self):
+        closest  = min(pump_calibration.keys(), key=lambda x : abs(x) - self.theta_v)
+        duration = pump_calibration[closest]
+        self.pump.turn(duration)
+        sleep(3)
+        
+    def water_at(self, x, y, safe=True):
+        if safe:
+            self.reset()
+        self.inverse(x, y)
+        self.water()
+        if safe:
+            self.reset()
+        self.inverse(0.0, arm_length)
+
 def main():
     turret = Turret()
-    # turret.inverse(1, -1)
-    # turret.inverse(arm_length, 0)
-    print(arm_length)
-    turret.inverse(0, arm_length)
-    # turret.inverse(-arm_length, 0)
+    # turret.water_at(250, 250)
+    # turret.water_at(350, 0, safe=True)
+    # turret.turn(5)
+    turret.up(90)
+    turret.turn(-90)
+    turret.up(-90)
 
 if __name__ == '__main__':
     main()
