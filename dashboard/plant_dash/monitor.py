@@ -74,7 +74,7 @@ class Monitor:
             'receive_rate'    : {'children': [html.H6('Receive Rate:'), f'{rrate:.2f}hz']},
             'plot_rate'    : {'children': [html.H6('Plot Rate:'),    f'{prate:.2f}hz']},
             'light'    : {'children': [html.H6('Light:'),        f'{light:.2f}']},
-            'humidity' : {'children': [html.H6('Humidity:'),     f'{humidity:.2f}hz']},
+            'humidity' : {'children': [html.H6('Humidity:'),     f'{humidity:.2f}']},
             **figures,
         })
 
