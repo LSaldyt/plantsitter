@@ -15,6 +15,7 @@ import asyncio
 from motor import Motor
 from turret import Turret
 
+turret = Turret()
 app = Quart(__name__)
 
 PROBES = [6, 13, 19, 26, 16, 21, 12, 5]

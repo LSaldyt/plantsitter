@@ -88,8 +88,7 @@ class Turret:
     def water(self):
         closest  = min(pump_calibration.keys(), key=lambda x : abs(x) - self.theta_v)
         duration = pump_calibration[closest]
-        self.pump.turn(duration)
-        sleep(3)
+        self.pump.turn(duration + 0.25)
         
     def water_at(self, x, y, safe=True):
         if safe:
@@ -104,11 +103,14 @@ def main():
     turret = Turret()
     # turret.water_at(250, 250)
     # turret.water_at(350, 0, safe=True)
-    turret.turn(5)
-    turret.turn(-5)
-    # turret.up(90)
-    #turret.turn(-90)
-    # turret.up(-90)
+    turret.water_at(80, 310, safe=True)
+    # turret.water_at(0, arm_length, safe=False)
+    # turret.water_at(0, 300, safe=False)
+    # length = arm_length
+    # while length > 100:
+    #     turret.water_at(0, length, safe=False)
+    #     length -= 50
+
 
 if __name__ == '__main__':
     main()
