@@ -24,6 +24,7 @@ class Controller(Connection):
         def command(n_clicks, value, actuator):
             command = self.connections.get('command', None)
             if command is not None:
+                log.info(f'Sent: {actuator} {value}')
                 command.send(json.dumps({actuator : value}))
             else:
                 log.info(f'Cannot send command: No connection!')

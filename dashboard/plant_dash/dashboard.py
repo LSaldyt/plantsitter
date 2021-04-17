@@ -23,7 +23,6 @@ from .tracker    import Tracker
 
 from .settings_manager import SettingsManager
 
-from plant_care.plant_scraper import PlantScraper
 
 class PlantDash:
     def __init__(self, app):
@@ -31,8 +30,6 @@ class PlantDash:
         self.config     = Config()
         self.app        = app
         self.connections = {k : None for k in self.config.connections}
-
-        self.scraper = PlantScraper(self.mongo)
 
         self.controller = Controller(app, self.connections)
         self.sitter     = Sitter(app, self.connections, self.mongo)

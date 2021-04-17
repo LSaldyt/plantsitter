@@ -36,16 +36,12 @@ def create_elements(app, TELEM):
     className="row flex-display",
     style={"margin-bottom": "25px"},),
 Div([Div([Div([H4('Plant Tracking'),
-              dcc.Dropdown(id='plant_select',
-                  options=[],
-                  multi=True,
-                  value=[],
-                  className="dcc_control"),
               Div([H6('Name'), dcc.Input(id='plant_name', type='text', value='')]),
               Div([H6('X'), dcc.Input(id='x_coordinate', type='number', value=0.0, style={'width' : '20%'})]),
               Div([H6('Y'), dcc.Input(id='y_coordinate', type='number', value=0.0, style={'width' : '20%'})]),
               Div([H6('Sensor'), dcc.Input(id='sensor_id', type='number', value=0.0, style={'width' : '20%'})]),
-               html.Button('Add', id='add_plant', n_clicks=0)
+               html.Button('Add', id='add_plant', n_clicks=0),
+               html.Button('Remove', id='remove_plant', n_clicks=0)
               ],
               className="pretty_container",
               id='settings',),

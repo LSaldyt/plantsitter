@@ -26,29 +26,34 @@ class Tracker:
         self.mongo  = mongo
         self.scraper = PlantScraper(mongo)
 
-        @app.callback(
-                [Output('plant_map', 'figure'),
-                 Output('plant_select', 'value'),
-                 Output('plant_select', 'options')],
+        @app.callback(None,
+                [Input('remove_plant', 'n_clicks')],
+                [State('remove_plant', 'value'),
+                 State('plant_name', 'value'),
+                 State('x_coordinate', 'value'),
+                 State('y_coordinate', 'value'),
+                 State('sensor_id', 'value')])
+        def remove_plant(n_clicks, button_value, plant_name, x, y, sensor):
+            if n_clicks > 0:
+                print(f'Removing plant!!: {plant_name} ({x}, {y})')
+                self.mongo.plants.list.remove(
+                    dict(name=plant_name, x=x, y=y),
+                    dict(justOne=True))
+
+        @app.callback(Output('plant_map', 'figure'),
                 [Input('add_plant', 'n_clicks')],
                 [State('add_plant', 'value'),
                  State('plant_name', 'value'),
                  State('x_coordinate', 'value'),
                  State('y_coordinate', 'value'),
-                 State('sensor_id', 'value'),
-                 State('plant_select', 'value'),
-                 State('plant_select', 'options')])
-        def add_plant(n_clicks, button_value, plant_name, x, y, sensor, plant_vals, plant_options):
+                 State('sensor_id', 'value')])
+        def add_plant(n_clicks, button_value, plant_name, x, y, sensor):
             if n_clicks > 0:
                 print(f'Adding plant!!: {plant_name} ({x}, {y})')
                 n = self.mongo.plants.list.count()
                 self.mongo.plants.list.insert_one(dict(name=plant_name, x=x, y=y, sensor=sensor, n=n))
-                plant_vals.append(plant_name)
-                plant_options.append({'label' : plant_name, 'value' : plant_name})
             else:
-                for entry in self.mongo.plants.list.find():
-                    name = entry['name']
-                    plant_options.append({'label' : name, 'value' : name})
+                pass
             x = []
             y = []
             text = []
@@ -59,20 +64,17 @@ class Tracker:
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=x, y=y, text=text, mode='markers+text', marker=dict(size=30, color='rgba(111, 168, 50, 0.5)')))
             fig.update_layout(title_text='Plant Locations')
-            return fig, plant_vals, plant_options
+            return fig
 
-        @app.callback(
-                [Output('description', 'children')],
-                [Input('add_plant', 'n_clicks')],
-                [State('add_plant', 'value'),
-                 State('plant_name', 'value'),
-                 State('x_coordinate', 'value'),
-                 State('y_coordinate', 'value'),
-                 State('plant_select', 'value'),
-                 State('plant_select', 'options')])
-        def update_description(n_clicks, button_value, plant_name, x, y, plant_vals, plant_options):
+        @app.callback(Output('description', 'children'),
+                      [Input('add_plant', 'n_clicks')],
+                      [State('add_plant', 'value'),
+                       State('plant_name', 'value'),
+                       State('x_coordinate', 'value'),
+                       State('y_coordinate', 'value')])
+        def update_description(n_clicks, button_value, plant_name, x, y):
             if n_clicks > 0:
                 entry = self.scraper.get(plant_name)
-                return [P(entry['summary'])]
+                return P(entry['summary'])
             else:
-                return [P('When new plants are added, wikipedia entries about them will appear here')]
+                return P('When new plants are added, wikipedia entries about them will appear here')
