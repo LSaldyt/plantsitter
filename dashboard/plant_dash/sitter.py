@@ -10,12 +10,36 @@ import logging as log
 from .monitor import Monitor
 
 from plant_care.plant_scraper import PlantScraper
-self.scraper = PlantScraper(self.mongo)
+
+'''
+name : name
+summary : wikipedia summary
+latin_name : 'Agave americana'
+common_name : ['Agave', 'American century plant']
+habitat : 'Perennial'
+height : 7.5,
+hardiness : [8, 9, 10, 11]
+growth : ['slow']
+soil : ['light', 'medium']
+shade : ['none']
+moisture : ['dry', 'moist']
+edible : 3
+medicinal : 3
+other : ' '
+'''
+
+# The following are watering thresholds
+#   For example, dry plants are only watered if their moisture is 0.8 or more
+calibrate = dict(dry=0.8,
+                 moist=0.6,
+                 wet=0.4,
+                 water=0.2)
 
 class Sitter(Monitor):
     def __init__(self, app, connections, mongo):
         Monitor.__init__(self, app, connections)
         self.mongo = mongo
+        self.scraper = PlantScraper(self.mongo)
 
     def update(self, telem):
         Monitor.update(self, telem)
@@ -30,6 +54,15 @@ class Sitter(Monitor):
                 moisture = telem[f'moisture_{sensor}']
             except KeyError:
                 print(f'Sensor {sensor} not found')
+                moisture = 0.0 # Safe value, won't be watered!
 
             print(f'Plant {name} @ ({x}mm, {y}mm) has moisture {moisture} from sensor {sensor}')
+            needs = list(self.scraper.care.find(dict(name=name)))[0]
+            moist_req = calibrate[needs['moisture'][0]]
+            print(f'Threshold: {moist_req}')
+            if moist_req < moisture:
+                status = 'needs to be watered'
+            else:
+                status = 'is already watered'
+            print(f'According to this, the {name} {status}')
 
