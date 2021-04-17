@@ -22,7 +22,8 @@ PROBES = [6, 13, 19, 26, 16, 21, 12, 5]
 SPEC    = {f'moisture_{i}' : p for i, p in enumerate(PROBES)}
 SPEC.update(dict(light=25, humidity=24))
 SENSORS = initialize_sensors(SPEC)
-LOCK    = asyncio.Lock()
+DATA_LOCK    = asyncio.Lock()
+COMMAND_LOCK = asyncio.Lock()
 
 conn = SeriesDatabase()
 
@@ -30,13 +31,24 @@ database_interval = 100
 system_interval   = 10
 
 async def capture(i):
-    async with LOCK:
-        plantdata = {k : v.value for k, v in SENSORS.items()}
+    plantdata = {k : v.value for k, v in SENSORS.items()}
     if i % system_interval == 0:
         plantdata.update(snapshot())
     plantdata['timestamp'] = time()
     # time = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
     return plantdata
+
+async def water(query):
+    threshold = query['threshold']
+    sensor    = 'moisture_' + str(query['sensor'])
+    moisture = SENSORS[sensor].value
+    async with COMMAND_LOCK:
+        while moisture > threshold:
+            x = query['x']
+            y = query['y']
+            print(f'WATERING at ({x}, {y})', flush=True)
+            turret.water_at(x, y, safe=True)
+            moisture = SENSORS[sensor].value
 
 @app.websocket('/data')
 async def datasocket():
@@ -49,12 +61,20 @@ async def datasocket():
 async def commandsocket():
     while True:
         data = await websocket.receive_json()
-        if 'main' in data:
-            turret.pump.turn(abs(data['main']))
+        print('RECEIVED COMMAND:')
+        print(data, flush=True)
+
+        if 'water' in data:
+            await water(data)
+        elif 'main' in data:
+            async with COMMAND_LOCK:
+                turret.pump.turn(abs(data['main']))
         elif 'horizontal' in data:
-            turret.turn(data['horizontal'])
+            async with COMMAND_LOCK:
+                turret.turn(data['horizontal'])
         elif 'vertical' in data:
-            turret.up(data['vertical'])
+            async with COMMAND_LOCK:
+                turret.up(data['vertical'])
 
 async def serializer():
     count = 0

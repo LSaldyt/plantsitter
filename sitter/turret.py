@@ -46,7 +46,8 @@ class Turret:
         self.horizontal = Motor(4, 17)
         self.pump       = Motor(22, 23)
 
-        self.theta_v, self.theta_h = 0.0, 0.0 # Track vertical/horizontal angles
+        # self.theta_v, self.theta_h = 0.0, 0.0 # Track vertical/horizontal angles
+        self.theta_v, self.theta_h = 90.0, 0.0 # Track vertical/horizontal angles
 
     def inv_theta_h(self, x, y):
         radians = atan2(x, y)
@@ -68,8 +69,10 @@ class Turret:
         self.theta_h += angle
 
     def reset(self):
-        theta_v = 90.0 - self.theta_v
-        self.up(theta_v)
+        d_theta_v = 90.0 - self.theta_v
+        self.up(d_theta_v)
+        d_theta_h = 0.0 - self.theta_h
+        self.turn(d_theta_h)
 
     def inverse(self, x, y):
         theta_h = self.inv_theta_h(x, y)
@@ -82,13 +85,14 @@ class Turret:
     def safe_inverse(self, x, y):
         self.reset()
         self.inverse(x, y)
-        self.reset()
-        self.inverse(0.0, arm_length)
 
     def water(self):
         closest  = min(pump_calibration.keys(), key=lambda x : abs(x) - self.theta_v)
-        duration = pump_calibration[closest]
-        self.pump.turn(duration + 0.25)
+        duration = pump_calibration[closest] + 0.2
+        self.pump.turn(duration)
+        sleep(3)
+        self.pump.turn(duration)
+        sleep(3)
         
     def water_at(self, x, y, safe=True):
         if safe:
@@ -97,20 +101,13 @@ class Turret:
         self.water()
         if safe:
             self.reset()
-        self.inverse(0.0, arm_length)
 
 def main():
     turret = Turret()
-    # turret.water_at(250, 250)
-    # turret.water_at(350, 0, safe=True)
-    turret.water_at(80, 310, safe=True)
-    # turret.water_at(0, arm_length, safe=False)
-    # turret.water_at(0, 300, safe=False)
-    # length = arm_length
-    # while length > 100:
-    #     turret.water_at(0, length, safe=False)
-    #     length -= 50
-
+    turret.water_at(50, 200)
+    # turret.turn(90)
+    # sleep(1)
+    # turret.up(-600000)
 
 if __name__ == '__main__':
     main()
