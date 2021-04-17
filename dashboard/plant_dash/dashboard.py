@@ -17,8 +17,11 @@ from utils.mongo  import MongoDatabases
 from .layout import create_elements
 
 from .controller import Controller
-from .monitor    import Monitor, TELEM
+from .monitor    import TELEM
+from .sitter     import Sitter
 from .tracker    import Tracker
+
+from .settings_manager import SettingsManager
 
 from plant_care.plant_scraper import PlantScraper
 
@@ -32,11 +35,12 @@ class PlantDash:
         self.scraper = PlantScraper(self.mongo)
 
         self.controller = Controller(app, self.connections)
-        self.monitor    = Monitor(app, self.connections)
+        self.sitter     = Sitter(app, self.connections, self.mongo)
 
-        self.handlers = [self.controller, self.monitor]
+        self.handlers = [self.controller, self.sitter]
 
         self.tracker    = Tracker(app, self.mongo)
+        self.manager    = SettingsManager(app, self.mongo)
 
         self.app.layout = create_elements(app, TELEM)
 

@@ -5,6 +5,7 @@ from dash_devices.dependencies import Input, Output, State
 from dash_html_components import P
 import dash_core_components as dcc
 import plotly.express as px
+import plotly.graph_objects as go
 from threading import Timer
 
 from websocket import create_connection
@@ -34,12 +35,14 @@ class Tracker:
                  State('plant_name', 'value'),
                  State('x_coordinate', 'value'),
                  State('y_coordinate', 'value'),
+                 State('sensor_id', 'value'),
                  State('plant_select', 'value'),
                  State('plant_select', 'options')])
-        def add_plant(n_clicks, button_value, plant_name, x, y, plant_vals, plant_options):
+        def add_plant(n_clicks, button_value, plant_name, x, y, sensor, plant_vals, plant_options):
             if n_clicks > 0:
                 print(f'Adding plant!!: {plant_name} ({x}, {y})')
-                self.mongo.plants.list.insert_one(dict(name=plant_name, x=x, y=y))
+                n = self.mongo.plants.list.count()
+                self.mongo.plants.list.insert_one(dict(name=plant_name, x=x, y=y, sensor=sensor, n=n))
                 plant_vals.append(plant_name)
                 plant_options.append({'label' : plant_name, 'value' : plant_name})
             else:
@@ -53,7 +56,8 @@ class Tracker:
                 text.append(entry['name'])
                 x.append(entry['x'])
                 y.append(entry['y'])
-            fig = px.scatter(x=x, y=y, text=text)
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=x, y=y, text=text, mode='markers+text', marker=dict(size=30, color='rgba(111, 168, 50, 0.5)')))
             fig.update_layout(title_text='Plant Locations')
             return fig, plant_vals, plant_options
 
@@ -66,7 +70,7 @@ class Tracker:
                  State('y_coordinate', 'value'),
                  State('plant_select', 'value'),
                  State('plant_select', 'options')])
-        def add_plant(n_clicks, button_value, plant_name, x, y, plant_vals, plant_options):
+        def update_description(n_clicks, button_value, plant_name, x, y, plant_vals, plant_options):
             if n_clicks > 0:
                 entry = self.scraper.get(plant_name)
                 return [P(entry['summary'])]
