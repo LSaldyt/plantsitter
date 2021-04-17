@@ -12,7 +12,7 @@ from twilio.rest import Client
 class TextClient:
     def __init__(self):
         self.config = Config()
-        self.client = Client(config.twilio_sid, config.twilio_token)
+        self.client = Client(self.config.twilio_sid, self.config.twilio_token)
 
     def text(self, message='Hello World!'):
         message = self.client.messages.create(

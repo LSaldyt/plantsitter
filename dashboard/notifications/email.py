@@ -31,7 +31,7 @@ class EmailClient:
         self.config = Config()
 
         self.creds = self.ensure_credentials()
-        self.service = build('gmail', 'v1', credentials=creds)
+        self.service = build('gmail', 'v1', credentials=self.creds)
 
     def ensure_credentials(self):
         creds = None
@@ -54,8 +54,8 @@ class EmailClient:
         return creds
 
 
-    def email(self):
-        message = MIMEText('Test')
+    def email(self, content='Test'):
+        message = MIMEText(content)
         message['To']   = self.config.email
         message['From'] = self.config.email
         message['Subject'] = 'Subject'
