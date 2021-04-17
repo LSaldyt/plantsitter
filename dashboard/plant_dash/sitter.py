@@ -6,6 +6,7 @@ from time      import time
 from pprint    import pprint
 
 import logging as log
+import json
 
 from .monitor import Monitor
 
@@ -41,6 +42,14 @@ class Sitter(Monitor):
         self.mongo = mongo
         self.scraper = PlantScraper(self.mongo)
 
+
+    def send(self, data):
+        command = self.connections.get('command', None)
+        if command is not None:
+            command.send(json.dumps(data))
+        else:
+            log.info(f'Cannot send command: No connection!')
+
     def update(self, telem):
         Monitor.update(self, telem)
 
@@ -62,7 +71,7 @@ class Sitter(Monitor):
             print(f'Threshold: {moist_req}')
             if moist_req < moisture:
                 status = 'needs to be watered'
+                self.send(dict(water=True, x=x, y=y))
             else:
                 status = 'is already watered'
             print(f'According to this, the {name} {status}')
-

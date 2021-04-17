@@ -19,8 +19,7 @@ class Controller(Connection):
 
         @app.callback(None, [Input('command', 'n_clicks')],
                             [State('input-on-submit', 'value'),
-                             State('actuator', 'value')
-                                ])
+                             State('actuator', 'value')])
         def command(n_clicks, value, actuator):
             command = self.connections.get('command', None)
             if command is not None:
