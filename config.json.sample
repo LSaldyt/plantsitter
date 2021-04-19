@@ -10,5 +10,6 @@
  "email" : "example@gmail.com",
  "connections" : ["data", "command"],
  "sleep_normal" : 0.05,
- "sleep_no_connection" : 1.0
+ "sleep_no_connection" : 1.0,
+ "check_period" : 60
  }

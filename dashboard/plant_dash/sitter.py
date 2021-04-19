@@ -41,7 +41,9 @@ class Sitter(Monitor):
         Monitor.__init__(self, app, connections)
         self.mongo = mongo
         self.scraper = PlantScraper(self.mongo)
+        self.connections = connections
 
+        self.latest = time()
 
     def send(self, data):
         command = self.connections.get('command', None)
@@ -53,25 +55,29 @@ class Sitter(Monitor):
     def update(self, telem):
         Monitor.update(self, telem)
 
-        for plant in self.mongo.plants.list.find():
-            name   = plant['name']
-            sensor = plant['sensor']
-            x      = plant['x']
-            y      = plant['y']
+        duration = time() - self.latest
 
-            try:
-                moisture = telem[f'moisture_{sensor}']
-            except KeyError:
-                print(f'Sensor {sensor} not found')
-                moisture = 0.0 # Safe value, won't be watered!
+        if duration > self.config.check_period:
+            for plant in self.mongo.plants.list.find():
+                name   = plant['name']
+                sensor = plant['sensor']
+                x      = plant['x']
+                y      = plant['y']
 
-            print(f'Plant {name} @ ({x}mm, {y}mm) has moisture {moisture} from sensor {sensor}')
-            needs = list(self.scraper.care.find(dict(name=name)))[0]
-            moist_req = calibrate[needs['moisture'][0]]
-            print(f'Threshold: {moist_req}')
-            if moist_req < moisture:
-                status = 'needs to be watered'
-                self.send(dict(water=True, x=x, y=y))
-            else:
-                status = 'is already watered'
-            print(f'According to this, the {name} {status}')
+                try:
+                    moisture = telem[f'moisture_{sensor}']
+                except KeyError:
+                    print(f'Sensor {sensor} not found')
+                    moisture = 0.0 # Safe value, won't be watered!
+
+                print(f'Plant {name} @ ({x}mm, {y}mm) has moisture {moisture} from sensor {sensor}')
+                needs = list(self.scraper.care.find(dict(name=name)))[0]
+                moist_req = calibrate[needs['moisture'][0]]
+                print(f'Threshold: {moist_req}')
+                if moist_req < moisture:
+                    status = 'needs to be watered'
+                    self.send(dict(water=True, x=x, y=y, threshold=moist_req, sensor=sensor))
+                else:
+                    status = 'is already watered'
+                print(f'According to this, the {name} {status}')
+            self.latest = time()

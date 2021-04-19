@@ -52,7 +52,6 @@ class Monitor:
     def iterate(self, connections):
         conn = connections['data']
         telem = json.loads(conn.recv())
-        pprint(telem)
         self.update(telem)
         now     = datetime.now()
         latency = (now - datetime.fromtimestamp(telem['timestamp'])).total_seconds()

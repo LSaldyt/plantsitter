@@ -58,12 +58,23 @@ class Tracker:
             y = []
             text = []
             for entry in self.mongo.plants.list.find():
-                text.append(entry['name'])
+                name   = entry['name']
+                sensor = entry['sensor']
+                text.append(f'{name} ({sensor})')
                 x.append(entry['x'])
                 y.append(entry['y'])
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=x, y=y, text=text, mode='markers+text', marker=dict(size=30, color='rgba(111, 168, 50, 0.5)')))
-            fig.update_layout(title_text='Plant Locations')
+            fig.update_xaxes(title_text='X (millimeters)',
+                             gridcolor='#aaaaaa',
+                             zerolinecolor='#aaaaaa')
+            fig.update_yaxes(title_text='Y (millimeters)',
+                             gridcolor='#aaaaaa',
+                             zerolinecolor='#aaaaaa')
+            fig.update_layout(title_text='Plant Locations',
+                              paper_bgcolor='#f9f9f9',
+                              plot_bgcolor='#f9f9f9')
+
             return fig
 
         @app.callback(Output('description', 'children'),
