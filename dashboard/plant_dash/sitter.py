@@ -58,6 +58,7 @@ class Sitter(Monitor):
         duration = time() - self.latest
 
         if duration > self.config.check_period:
+            self.mongo.plants.latest.drop()
             for plant in self.mongo.plants.list.find():
                 name   = plant['name']
                 sensor = plant['sensor']
@@ -76,8 +77,10 @@ class Sitter(Monitor):
                 print(f'Threshold: {moist_req}')
                 if moist_req < moisture:
                     status = 'needs to be watered'
-                    self.send(dict(water=True, x=x, y=y, threshold=moist_req, sensor=sensor))
+                    # self.send(dict(water=True, x=x, y=y, threshold=moist_req, sensor=sensor))
                 else:
                     status = 'is already watered'
                 print(f'According to this, the {name} {status}')
+                plant['moisture'] = moisture
+                self.mongo.plants.latest.insertOne(plant)
             self.latest = time()
