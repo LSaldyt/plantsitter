@@ -23,6 +23,8 @@ google-auth-oauthlib = "^0.4.3"
 pymongo = "^3.11.3"
 selenium = "^3.141.0"
 wikipedia = "^1.4.0"
+dash-renderer = "^1.9.1"
+dash-daq = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
 
