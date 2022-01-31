@@ -82,5 +82,5 @@ class Sitter(Monitor):
                     status = 'is already watered'
                 print(f'According to this, the {name} {status}')
                 plant['moisture'] = moisture
-                self.mongo.plants.latest.insertOne(plant)
+                self.mongo.plants.latest.insert_one(plant)
             self.latest = time()

@@ -6,6 +6,7 @@ from dash_html_components import P
 import dash_core_components as dcc
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly
 from threading import Timer
 
 from websocket import create_connection
@@ -70,9 +71,35 @@ class Tracker:
             else:
                 return P('When new plants are added, wikipedia entries about them will appear here')
 
+        @app.callback(Output('needs_description', 'children'),
+                      [Input('add_plant', 'n_clicks')],
+                      [State('add_plant', 'value'),
+                       State('plant_name', 'value'),
+                       State('x_coordinate', 'value'),
+                       State('y_coordinate', 'value')])
+        def update_description(n_clicks, button_value, plant_name, x, y):
+            if n_clicks > 0:
+                entry = self.scraper.get(plant_name)
+                latin  = entry['latin_name']
+                common = entry['common_name'][0]
+                habitat = entry['habitat']
+                height  = entry['height']
+                soil    = ' or '.join(entry['soil'])
+                shade   = ' or '.join(s if s != 'none' else 'no'
+                                      for s in entry['shade'])
+                moist   = ' or '.join(entry['moisture'])
+
+
+                description = f'''The {latin}, or {common} lives in a {habitat} habitat, grows to around {height}m, prefers {soil} and {moist} soil with {shade} shade'''
+
+                return P(description)
+            else:
+                return P('When new plants are added, wikipedia entries about them will appear here')
+
     def plot_plants(self):
         x = []
         y = []
+        c = []
         text = []
         by_name = {(plant['name'], plant['x'], plant['y']) : plant
                    for plant in self.mongo.plants.latest.find()}
@@ -81,10 +108,17 @@ class Tracker:
             name   = entry['name']
             sensor = entry['sensor']
             text.append(f'{name} ({sensor})')
-            x.append(entry['x'])
-            y.append(entry['y'])
+            ex = entry['x']
+            ey = entry['y']
+            x.append(ex)
+            y.append(ey)
+            if len(by_name) > 0:
+                try:
+                    c.append(by_name[(name, ex, ey)]['moisture'])
+                except KeyError:
+                    c.append(1.0)
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x, y=y, text=text, mode='markers+text', marker=dict(size=30, color='rgba(111, 168, 50, 0.5)')))
+        fig.add_trace(go.Scatter(x=x, y=y, text=text, opacity=0.8, mode='markers+text', marker=dict(size=30, color=c, colorscale=plotly.colors.sequential.Greens_r[2:-4])))
         fig.update_xaxes(title_text='X (millimeters)',
                          gridcolor='#aaaaaa',
                          zerolinecolor='#aaaaaa')
@@ -94,5 +128,4 @@ class Tracker:
         fig.update_layout(title_text='Plant Locations',
                           paper_bgcolor='#f9f9f9',
                           plot_bgcolor='#f9f9f9')
-
         return fig
